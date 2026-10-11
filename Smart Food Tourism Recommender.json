@@ -1,0 +1,990 @@
+{
+  "name": "Smart Food Tourism Recommender",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ca8fff0-74bd-4371-82f0-286ca481a0dc",
+              "name": "City",
+              "value": "Chennai",
+              "type": "string"
+            },
+            {
+              "id": "98715e12-fdde-4e65-8f8e-6fe0cb00d721",
+              "name": "Budget",
+              "value": "1000",
+              "type": "string"
+            },
+            {
+              "id": "14d0d814-92e9-4a12-bf4f-98da9bb9a5e2",
+              "name": "food_preference",
+              "value": "Vegetarian",
+              "type": "string"
+            },
+            {
+              "id": "a7a28a0f-962d-4c2e-90fb-f0ab57b2ee3b",
+              "name": "Days",
+              "value": "1",
+              "type": "string"
+            },
+            {
+              "id": "8dfb4463-a88d-419b-a01f-f1480f19acd8",
+              "name": "Travel style",
+              "value": "culture and food explore",
+              "type": "string"
+            },
+            {
+              "id": "cbea279c-e6f5-43b9-bae7-fd4cb7ccc401",
+              "name": "email",
+              "value": "andreajoseph1510@gmail.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "fdb3df30-41db-42d2-b05b-0d1b031d87a1",
+      "name": "User preferences"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2824642-c54b-425b-9e5d-de9cdac355a2",
+              "name": "latitude",
+              "value": "13.0827",
+              "type": "string"
+            },
+            {
+              "id": "8dcff3f7-8910-4428-b92c-29a8728457d3",
+              "name": "longitude",
+              "value": " 80.2707",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "4fbf1dcf-d1c3-48eb-8d6f-2dd9eb631a77",
+      "name": "Location"
+    },
+    {
+      "parameters": {
+        "url": "https://overpass-api.de/api/interpreter",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "[out:json][timeout:200];node(around:1000,13.0827,80.2707)[amenity=restaurant];out;"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "n8n-Restaurant-Finder/1.0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "c5a40104-62eb-49d8-8f74-2076882ad244",
+      "name": "Get Restaurants",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "elements",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        896,
+        0
+      ],
+      "id": "17c72cfb-98f0-4833-b5a7-f3e209bcb4bd",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=13.0827&longitude=80.2707&current=temperature_2m%2Crelative_humidity_2m%2Cprecipitation%2Cweather_code&daily=precipitation_probability_max%2Ctemperature_2m_max%2Ctemperature_2m_min&timezone=Asia%2FKolkata",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        848,
+        320
+      ],
+      "id": "4440e993-14cb-4312-9955-e8f6a780f29d",
+      "name": "Get weather"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://overpass-api.de/api/interpreter",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-overpass-test"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "[out:json][timeout:350]; (   nwr[\"tourism\"=\"attraction\"](around:5000,13.0827,80.2707);   nwr[\"tourism\"=\"museum\"](around:5000,13.0827,80.2707);   nwr[\"historic\"](around:5000,13.0827,80.2707);   nwr[\"leisure\"=\"park\"](around:5000,13.0827,80.2707); ); out center;"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        752,
+        -176
+      ],
+      "id": "b578f8a5-1c18-433c-bca5-6613460c95d9",
+      "name": "Get attractions",
+      "retryOnFail": true,
+      "waitBetweenTries": 1000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst elements = $json.elements || [];\n\nreturn elements.map(place => {\n  const tags = place.tags || {};\n\n  return {\n    json: {\n      name: tags.name || \"Unknown\",\n      category:\n        tags.tourism ||\n        tags.historic ||\n        tags.leisure ||\n        \"attraction\",\n      latitude: place.lat ?? place.center?.lat,\n      longitude: place.lon ?? place.center?.lon,\n      city: tags[\"addr:city\"] || \"Chennai\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -176
+      ],
+      "id": "50f2f79c-4907-4c3c-9d4f-72f36e58cf2a",
+      "name": "Clean Attraction Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst items = $input.all();\n\nreturn items\n  .filter(item => item.json.tags?.name)\n  .map(item => {\n    const place = item.json;\n    const tags = place.tags || {};\n\n    return {\n      json: {\n        name: tags.name || \"Unknown\",\n\n        cuisine: tags.cuisine || \"Unknown\",\n\n        type: tags.amenity || \"Unknown\",\n\n        latitude: place.lat ?? place.center?.lat,\n        longitude: place.lon ?? place.center?.lon,\n\n        address: [\n          tags[\"addr:housenumber\"],\n          tags[\"addr:street\"],\n          tags[\"addr:city\"]\n        ]\n          .filter(Boolean)\n          .join(\", \"),\n\n        opening_hours: tags.opening_hours || \"Not available\",\n\n        phone: tags.phone || \"Not available\",\n\n        website: tags.website || \"Not available\",\n\n        vegetarian: tags[\"diet:vegetarian\"] || \"unknown\",\n\n        vegan: tags[\"diet:vegan\"] || \"unknown\",\n\n        takeaway: tags.takeaway || \"unknown\",\n\n        outdoor_seating: tags.outdoor_seating || \"unknown\",\n\n        wheelchair: tags.wheelchair || \"unknown\",\n\n        city: tags[\"addr:city\"] || \"Chennai\"\n      }\n    };\n  });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "22d5e389-b355-435b-80d1-55d53fd14165",
+      "name": "Clean Restaurant data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1424,
+        32
+      ],
+      "id": "fc6eefc0-5c53-4472-a896-bfc94eec541f",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst items = $input.all();\n\n// Separate weather from places\nconst weatherItem = items.find(item => item.json.current);\nconst places = items.filter(item => !item.json.current);\n\n// Get weather data\nconst weather = weatherItem?.json || {};\nconst current = weather.current || {};\n\nconst temperature = current.temperature_2m ?? 30;\nconst precipitation = current.precipitation ?? 0;\nconst weatherCode = current.weather_code ?? 0;\n\n// User preference\nconst user = $('User preferences').first().json;\n\nconst foodPreference = (\n  user.food_preference || \"vegetarian\"\n).toLowerCase();\n\nreturn places.map(item => {\n\n  const data = item.json;\n\n  // -------------------------\n  // 1. Cuisine Score\n  // -------------------------\n  let cuisineScore = 0.5;\n\n  if (data.cuisine) {\n    const cuisine = data.cuisine.toLowerCase();\n\n    if (cuisine.includes(foodPreference)) {\n      cuisineScore = 1;\n    } else if (\n      foodPreference === \"vegetarian\" &&\n      (cuisine.includes(\"indian\") ||\n       cuisine.includes(\"veg\"))\n    ) {\n      cuisineScore = 0.8;\n    } else {\n      cuisineScore = 0.3;\n    }\n  }\n\n  // -------------------------\n  // 2. Distance\n  // -------------------------\n  const lat = data.latitude ?? 13.0827;\n  const lon = data.longitude ?? 80.2707;\n\n  const distance =\n    Math.sqrt(\n      Math.pow(lat - 13.0827, 2) +\n      Math.pow(lon - 80.2707, 2)\n    ) * 111;\n\n  const distanceScore = Math.max(\n    0,\n    1 - distance / 5\n  );\n\n  // -------------------------\n  // 3. Weather Score\n  // -------------------------\n  let weatherScore = 1;\n\n  // Rain → outdoor places become less suitable\n  if (precipitation > 0) {\n    weatherScore = 0.4;\n  }\n\n  // Very hot → slightly lower suitability\n  if (temperature > 35) {\n    weatherScore = 0.6;\n  }\n\n  // -------------------------\n  // 4. Place Type Score\n  // -------------------------\n  let typeScore = 0.5;\n\n  if (data.type === \"restaurant\") {\n    typeScore = 1;\n  } else if (data.category === \"museum\") {\n    typeScore = 0.9;\n  } else if (data.category === \"attraction\") {\n    typeScore = 0.8;\n  } else if (data.category === \"park\") {\n    typeScore = 0.7;\n  }\n\n  return {\n    json: {\n      ...data,\n\n      distance_km: Number(distance.toFixed(2)),\n\n      cuisine_score: Number(cuisineScore.toFixed(2)),\n\n      distance_score: Number(distanceScore.toFixed(2)),\n\n      weather_score: Number(weatherScore.toFixed(2)),\n\n      type_score: Number(typeScore.toFixed(2)),\n\n      temperature: temperature,\n\n      precipitation: precipitation,\n\n      weather_code: weatherCode\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        -192
+      ],
+      "id": "c5edb584-30cf-43d8-bc0b-4c0ca1829f05",
+      "name": "Feature Engineering"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1280,
+        -288
+      ],
+      "id": "2171ec13-bf6d-4895-8def-cb5df3ec2a22",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst items = $input.all();\n\nconst user = $('User preferences').first().json;\n\nconst foodPreference =\n  (user.food_preference || \"vegetarian\").toLowerCase();\n\nconst travelStyle =\n  (user.travel_style || \"culture_and_food\").toLowerCase();\n\nreturn items.map(item => {\n  const data = item.json;\n\n  const cuisine = (data.cuisine || \"\").toLowerCase();\n  const category = (data.category || \"\").toLowerCase();\n  const type = (data.type || \"\").toLowerCase();\n\n  // -------------------------\n  // DISTANCE SCORE\n  // -------------------------\n  const distanceScore = data.distance_score ?? 0.5;\n\n  // -------------------------\n  // WEATHER SCORE\n  // -------------------------\n  const weatherScore = data.weather_score ?? 0.5;\n\n  // -------------------------\n  // RESTAURANT SCORE\n  // -------------------------\n  let restaurantScore = 0;\n\n  if (type === \"restaurant\" || type === \"cafe\" || type === \"fast_food\") {\n\n    let cuisineScore = 0.5;\n\n    if (cuisine.includes(foodPreference)) {\n      cuisineScore = 1;\n    }\n\n    if (\n      foodPreference === \"vegetarian\" &&\n      (\n        cuisine.includes(\"indian\") ||\n        data.vegetarian === \"only\"\n      )\n    ) {\n      cuisineScore = 1;\n    }\n\n    let dietaryScore = 0.5;\n\n    if (foodPreference === \"vegetarian\") {\n      if (data.vegetarian === \"only\" ||\n          data.vegetarian === \"yes\") {\n        dietaryScore = 1;\n      }\n    }\n\n    if (foodPreference === \"vegan\") {\n      if (data.vegan === \"only\" ||\n          data.vegan === \"yes\") {\n        dietaryScore = 1;\n      }\n    }\n\n    restaurantScore =\n      (cuisineScore * 0.40) +\n      (dietaryScore * 0.25) +\n      (distanceScore * 0.20) +\n      (weatherScore * 0.15);\n\n    return {\n      json: {\n        ...data,\n        place_kind: \"restaurant\",\n        cuisine_score: Number(cuisineScore.toFixed(2)),\n        dietary_score: Number(dietaryScore.toFixed(2)),\n        recommendation_score:\n          Number(restaurantScore.toFixed(3))\n      }\n    };\n  }\n\n  // -------------------------\n  // ATTRACTION SCORE\n  // -------------------------\n\n  let categoryScore = 0.5;\n\n  if (\n    travelStyle.includes(\"culture\") &&\n    (\n      category.includes(\"museum\") ||\n      category.includes(\"historic\")\n    )\n  ) {\n    categoryScore = 1;\n  }\n\n  if (\n    travelStyle.includes(\"nature\") &&\n    category.includes(\"park\")\n  ) {\n    categoryScore = 1;\n  }\n\n  if (category.includes(\"attraction\")) {\n    categoryScore = 0.8;\n  }\n\n  const attractionScore =\n    (categoryScore * 0.40) +\n    (distanceScore * 0.35) +\n    (weatherScore * 0.25);\n\n  return {\n    json: {\n      ...data,\n      place_kind: \"attraction\",\n      category_score: Number(categoryScore.toFixed(2)),\n      recommendation_score:\n        Number(attractionScore.toFixed(3))\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -192
+      ],
+      "id": "644aeddf-e718-4ef6-b79f-f338facfb6bd",
+      "name": "Recommendation Score"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "recommendation_score",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        -192
+      ],
+      "id": "03d80ca7-76d5-4531-bd72-ded64e702654",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst items = $input.all();\n\nconst restaurants = items\n  .filter(item => item.json.place_kind === \"restaurant\")\n  .slice(0, 5);\n\nconst attractions = items\n  .filter(item => item.json.place_kind === \"attraction\")\n  .slice(0, 5);\n\nreturn [...restaurants, ...attractions];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2224,
+        -192
+      ],
+      "id": "24e97a65-28a4-4704-b414-e854ff64b409",
+      "name": "Select Top Recommendations"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst items = $input.all();\n\nconst restaurants = items\n  .filter(item => item.json.place_kind === \"restaurant\")\n  .map(item => item.json);\n\nconst attractions = items\n  .filter(item => item.json.place_kind === \"attraction\")\n  .map(item => item.json);\n\nconst user = $('User preferences').first().json;\n\nreturn [\n  {\n    json: {\n      user_preferences: user,\n      restaurants,\n      attractions\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2416,
+        -48
+      ],
+      "id": "9977da91-0e9e-493e-911d-df7cab5ad40c",
+      "name": "Prepare AI Input"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Smart Food Tourism Planning Agent.\n\nCreate a personalized food tourism itinerary using ONLY the restaurants and attractions provided in the input data.\n\nUSER PREFERENCES:\n{{ JSON.stringify($json.user_preferences) }}\n\nRANKED RESTAURANTS:\n{{ JSON.stringify($json.restaurants) }}\n\nRANKED ATTRACTIONS:\n{{ JSON.stringify($json.attractions) }}\n\nBUDGET INFORMATION:\n{{ JSON.stringify($json.budget_info) }}\n\nBudget Rules:\n1. Plan the itinerary within the user's total budget where possible.\n2. Use daily budget and meal allocations as planning targets.\n3. Restaurant prices are not guaranteed to be available; do NOT invent prices.\n4. If actual prices are unavailable, clearly state in the reason field that the budget is an estimated planning allocation.\n5. Use the Calculator tool for any required calculations.\n\nPlanning & Selection Rules:\n1. Respect the user's food preference (e.g., vegetarian, non-vegetarian).\n2. Prioritize places with higher recommendation scores.\n3. Consider physical proximity/distance and weather conditions.\n4. Create an itinerary matching the requested number of days in user preferences.\n5. Do NOT invent restaurants, attractions, prices, or ratings.\n6. Use ONLY the provided input data.\n7. If insufficient places exist to fill a slot, set \"name\" to \"Not available\", \"time\" to \"N/A\", and \"reason\" to \"No suitable place provided in input\".\n\nOUTPUT FORMAT REQUIREMENTS:\n- Output MUST be valid JSON ONLY.\n- Do NOT wrap output in Markdown code blocks (do NOT use ``` or ```json).\n- Do NOT include any introductory or concluding text.\n\nJSON Schema:\n{\n  \"city\": \"String (e.g., Chennai)\",\n  \"trip_title\": \"String\",\n  \"total_budget\": Number,\n  \"budget_note\": \"String (explain allocation or price availability)\",\n  \"weather_summary\": \"String (or 'Not available')\",\n  \"days\": [\n    {\n      \"day\": Number,\n      \"title\": \"String\",\n      \"breakfast\": {\n        \"name\": \"String\",\n        \"time\": \"String (e.g., 08:30 AM)\",\n        \"reason\": \"String\"\n      },\n      \"morning_attraction\": {\n        \"name\": \"String\",\n        \"time\": \"String (e.g., 10:30 AM)\",\n        \"reason\": \"String\"\n      },\n      \"lunch\": {\n        \"name\": \"String\",\n        \"time\": \"String (e.g., 01:00 PM)\",\n        \"reason\": \"String\"\n      },\n      \"evening_attraction\": {\n        \"name\": \"String\",\n        \"time\": \"String (e.g., 04:00 PM)\",\n        \"reason\": \"String\"\n      },\n      \"dinner\": {\n        \"name\": \"String\",\n        \"time\": \"String (e.g., 08:00 PM)\",\n        \"reason\": \"String\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2080,
+        192
+      ],
+      "id": "6324c856-5da3-4d32-85a6-9cc55aaf80fd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1984,
+        384
+      ],
+      "id": "94e7ccbe-4c0c-49c2-89ad-200c5c31c567",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "bACXsyJbsXQFGa7S",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2336,
+        384
+      ],
+      "id": "73458e39-33a8-42dd-b342-0cee78fad442",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst output = $json.output || \"\";\n\nreturn [\n  {\n    json: {\n      itinerary: output\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        192
+      ],
+      "id": "e371481c-cf65-445c-9d1f-57d262484d1c",
+      "name": "Format Final Output"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst data = $json;\n\nconst user = data.user_preferences || {};\n\nconst budget = Number(user.budget || 0);\nconst days = Number(user.days || 1);\n\nconst dailyBudget = budget / days;\n\nreturn [\n  {\n    json: {\n      ...data,\n\n      budget_info: {\n        total_budget: budget,\n        days: days,\n        daily_budget: Number(dailyBudget.toFixed(2)),\n        breakfast_budget: Number((dailyBudget * 0.20).toFixed(2)),\n        lunch_budget: Number((dailyBudget * 0.30).toFixed(2)),\n        dinner_budget: Number((dailyBudget * 0.30).toFixed(2)),\n        activities_budget: Number((dailyBudget * 0.20).toFixed(2))\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2656,
+        -48
+      ],
+      "id": "48f3cd99-f0dd-4fe7-9344-a67abd5e9158",
+      "name": "Budget Planning"
+    },
+    {
+      "parameters": {
+        "tableId": "users",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "={{ 'food_preference' }}",
+              "fieldValue": "={{ $json.food_preference }}"
+            },
+            {
+              "fieldId": "={{ 'budget' }}",
+              "fieldValue": "={{ $json.budget }}"
+            },
+            {
+              "fieldId": "={{ 'days' }}",
+              "fieldValue": "={{ $json.days }}"
+            },
+            {
+              "fieldId": "={{ 'travel_style' }}",
+              "fieldValue": "={{ $json.travel_style }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        240,
+        288
+      ],
+      "id": "35d5528a-33ce-49a7-a26c-ff9460ff5cb7",
+      "name": "Save User",
+      "credentials": {
+        "supabaseApi": {
+          "id": "Qi1HzmNGNoEaAqqm",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safely parse JSON output from Format Final Output node\nlet itinerary = {};\ntry {\n  itinerary = typeof $json.itinerary === 'string' \n    ? JSON.parse($json.itinerary) \n    : ($json.itinerary || {});\n} catch (e) {\n  itinerary = $json.itinerary || {};\n}\n\n// Extract first day data safely\nconst dayData = (itinerary.days && itinerary.days[0]) ? itinerary.days[0] : {};\n\nreturn [\n  {\n    json: {\n      city: itinerary.city || \"\",\n      trip_title: itinerary.trip_title || \"\",\n      day: dayData.day || 1,\n      day_title: dayData.title || \"\",\n      total_budget: itinerary.total_budget || 0,\n      budget_note: itinerary.budget_note || \"\",\n      weather_summary: itinerary.weather_summary || \"\",\n\n      // Location Names\n      breakfast: dayData.breakfast?.name || \"\",\n      morning_attraction: dayData.morning_attraction?.name || \"\",\n      lunch: dayData.lunch?.name || \"\",\n      evening_attraction: dayData.evening_attraction?.name || \"\",\n      dinner: dayData.dinner?.name || \"\",\n\n      // Location Times\n      breakfast_time: dayData.breakfast?.time || \"\",\n      morning_attraction_time: dayData.morning_attraction?.time || \"\",\n      lunch_time: dayData.lunch?.time || \"\",\n      evening_attraction_time: dayData.evening_attraction?.time || \"\",\n      dinner_time: dayData.dinner?.time || \"\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        192
+      ],
+      "id": "d93c2ec4-e1ba-4424-a138-66d557ebd007",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ouERi4SSPW7yDmqs-CqaRlBxV3_wbKmdGAX6SPZG0ao",
+          "mode": "list",
+          "cachedResultName": "Food and Tourism",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ouERi4SSPW7yDmqs-CqaRlBxV3_wbKmdGAX6SPZG0ao/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ouERi4SSPW7yDmqs-CqaRlBxV3_wbKmdGAX6SPZG0ao/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "city": "={{ $json.city }}",
+            "trip_title": "={{ $json.trip_title }}",
+            "day_title": "={{ $json.day_title }}",
+            "lunch": "={{ $json.lunch }}",
+            "breakfast": "={{ $json.breakfast }}",
+            "morning_attraction": "={{ $json.morning_attraction }}",
+            "dinner": "={{ $json.dinner }}",
+            "total_budget": "={{ $json.total_budget }}",
+            "evening_attraction": "={{ $json.evening_attraction }}",
+            "day": "={{ $json.day }}",
+            "breakfast_time": "={{ $json.breakfast_time }}",
+            "morning_attraction_time": "={{ $json.morning_attraction_time }}",
+            "lunch_time": "={{ $json.lunch_time }}",
+            "evening_attraction_time": "={{ $json.evening_attraction_time }}",
+            "dinner_time": "={{ $json.dinner_time }}",
+            "budget_note": "={{ $json.budget_note }}",
+            "weather_summary": "={{ $json.weather_summary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "trip_title",
+              "displayName": "trip_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "day",
+              "displayName": "day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "day_title",
+              "displayName": "day_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total_budget",
+              "displayName": "total_budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "breakfast",
+              "displayName": "breakfast",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "breakfast_time",
+              "displayName": "breakfast_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "morning_attraction",
+              "displayName": "morning_attraction",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "morning_attraction_time",
+              "displayName": "morning_attraction_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lunch",
+              "displayName": "lunch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lunch_time",
+              "displayName": "lunch_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "evening_attraction",
+              "displayName": "evening_attraction",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "evening_attraction_time",
+              "displayName": "evening_attraction_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dinner",
+              "displayName": "dinner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dinner_time",
+              "displayName": "dinner_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget_note",
+              "displayName": "budget_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "weather_summary",
+              "displayName": "weather_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2928,
+        192
+      ],
+      "id": "ae57accf-47cf-4d00-8f7b-364451a634dc",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "WL8nEmUbfwE407p4",
+          "name": "Google Service Account account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fe33045f-1935-44c8-9d02-d32fe78d9699",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6af36faf-26e4-4167-8128-dabe854efffb",
+              "name": "summary",
+              "value": "=={{ \"Trip Title: \" + $node[\"Append row in sheet\"].json[\"trip_title\"] + \"\\nCity: \" + $node[\"Append row in sheet\"].json[\"city\"] + \"\\nFigma Card: https://www.figma.com/design/zSLKf8psi90tfMI2FJfupn/Untitled?node-id=0-1\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        3152,
+        192
+      ],
+      "id": "738f65e0-fdce-448f-a25f-2c4d11e791a7",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "User preferences": {
+      "main": [
+        [
+          {
+            "node": "Location",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Location": {
+      "main": [
+        [
+          {
+            "node": "Get Restaurants",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get weather",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get attractions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Restaurants": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Clean Restaurant data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get attractions": {
+      "main": [
+        [
+          {
+            "node": "Clean Attraction Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Attraction Data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Restaurant data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get weather": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Feature Engineering",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feature Engineering": {
+      "main": [
+        [
+          {
+            "node": "Recommendation Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommendation Score": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Select Top Recommendations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Top Recommendations": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Input": {
+      "main": [
+        [
+          {
+            "node": "Budget Planning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Final Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Budget Planning": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Output": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "User preferences",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4ca6347d-4d07-49de-aacb-a33dd35bfaf5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "933a3c8c622e7a964f7970b5f6e01ffc77d7fcd01f586b8b25acac4344f890d8"
+  },
+  "nodeGroups": [],
+  "id": "CUdrrODBg7UFbOK6",
+  "tags": []
+}
